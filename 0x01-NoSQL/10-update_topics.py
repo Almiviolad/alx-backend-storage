@@ -6,5 +6,4 @@ def update_topics(mongo_collection, name, topics):
     of a school document based on the name:"""
     search = {"name": name}
     new_values = {"$set": {"topics": topics}}
-    x = mongo_collection.update_many(search, new_values)
-    print (x)
+    mongo_collection.update_many(search, new_values)
