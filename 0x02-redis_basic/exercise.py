@@ -10,6 +10,19 @@ store the input data in Redis using the random key and return the key."""
 import uuid
 from typing import Union, Callable, Optional
 import redis
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    """decorator that take Callable argument and returns a Callable."""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs) -> str:
+        """function that counts the time method is called
+and returns the value returned by the original method"""
+        key = method.__qualname__
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
@@ -20,6 +33,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """store data in redus db"""
         self.id = uuid.uuid4()
@@ -28,7 +42,8 @@ class Cache:
         self._redis.close()
         return self.key
 
-    def get(self, key: str, fn: Optional[Callable]=None) -> Union[str, bytes, int, float]:
+    def get(self, key: str, fn: Optional[Callable] = None) ->
+    Union[str, bytes, int, float]:
         """gets value from redis db using key, fn changes it to fotmat"""
         value = self._redis.get(key)
         if (fn):
