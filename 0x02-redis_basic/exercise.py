@@ -42,8 +42,7 @@ class Cache:
         self._redis.close()
         return self.key
 
-    def get(self, key: str, fn: Optional[Callable] = None) ->
-    Union[str, bytes, int, float]:
+    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         """gets value from redis db using key, fn changes it to fotmat"""
         value = self._redis.get(key)
         if (fn):
