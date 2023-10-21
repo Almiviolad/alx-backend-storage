@@ -31,9 +31,8 @@ def call_history(method: Callable) -> Callable:
         """wrapper functiin that returns method"""
         input_key = method.__qualname__ + ":inputs"
         output_key = method.__qualname__ + ":outputs"
-        for arg in args:
-            self._redis.rpush(input_key, str(arg))
-            self._redis.rpush(output_key, method(self, arg))
+        self._redis.rpush(input_key, str(args))
+        self._redis.rpush(output_key, method(self, str(args)))
         return method(self, *args, **kwargs)
     return wrapper
 
