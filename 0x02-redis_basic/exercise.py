@@ -24,6 +24,18 @@ and returns the value returned by the original method"""
         return method(self, *args, **kwargs)
     return wrapper
 
+def call_history(method: Callable) -> Callable:
+    """decorator to store the history of inputs and outputs for a particular function"""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs) -> str:
+        """wrapper functiin that returns method"""
+        input_key = method.__qualname__ + ":inputs"
+        output_key = method.__qualname__ + ":outputs"
+        for arg in args:
+            self._redis.rpush(input_key, str(arg))
+            self._redis.rpush(output_key, method(self, arg))
+        return method(self, *args, **kwargs)
+    return wrapper
 
 class Cache:
     """ Cache class"""
@@ -34,6 +46,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """store data in redus db"""
         self.id = uuid.uuid4()
